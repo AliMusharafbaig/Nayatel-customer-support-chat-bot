@@ -11,3 +11,4 @@ requests
 torch
 torchvision
 torchaudio
+sentence_transformers
