@@ -28,8 +28,7 @@ if not huggingface_api_token:
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = huggingface_api_token
 
 # Predefined PDF path
-PDF_PATH = "nayatelinformation.pdf"  # Update this path to your PDF file path
-
+PDF_PATH = "nayatelinformation.pdf"
 
 # Function to extract text from a single page
 def extract_text_from_page(page_info):
@@ -40,7 +39,6 @@ def extract_text_from_page(page_info):
     except Exception:
         return ""
 
-
 # Function to get raw text from the predefined PDF
 def get_pdf_text(pdf_path):
     with open(pdf_path, 'rb') as file:
@@ -50,7 +48,6 @@ def get_pdf_text(pdf_path):
             results = executor.map(extract_text_from_page, page_infos)
     return "".join(results)
 
-
 # Function to split text into chunks
 def get_text_chunks(raw_text, chunk_size=1000):
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -59,12 +56,10 @@ def get_text_chunks(raw_text, chunk_size=1000):
     chunks = [chunk for chunk in chunks if len(chunk) < 16000]
     return [tokenizer.decode(chunk) for chunk in chunks]
 
-
 # Function to create a vector store
 def get_vectorstore(text_chunks):
     embeddings = HuggingFaceEmbeddings()
     return FAISS.from_texts(texts=text_chunks, embedding=embeddings)
-
 
 # Function to create a conversation chain
 def get_conversation_chain(vectorstore):
@@ -74,7 +69,6 @@ def get_conversation_chain(vectorstore):
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
     return ConversationalRetrievalChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(), memory=memory)
 
-
 # Pre-process the PDF and initialize the conversation chain
 with st.spinner("Setting up the bot..."):
     raw_text = get_pdf_text(PDF_PATH)
@@ -83,27 +77,26 @@ with st.spinner("Setting up the bot..."):
     st.session_state.conversation = get_conversation_chain(vectorstore)
     st.success("Vector store (FAISS index) created successfully!")
 
-
 # Function to handle user input
 def handle_userinput(user_question):
     if st.session_state.conversation:
         # Determine if the question is a greeting or general support query
         greetings = re.compile(r'\b(hi|hello|hey|good morning|good evening|good afternoon)\b', re.IGNORECASE)
-        general_support_queries = re.compile(r'\b(i need help|i\'m in trouble|support|help me|assistance)\b',
-                                             re.IGNORECASE)
-        nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH|troubleshoot)\b', re.IGNORECASE)
-        irrelevant = re.compile(r'\b(actor|celebrity|movie|programming|python)\b', re.IGNORECASE)
+        general_support_queries = re.compile(r'\b(i need help|i\'m in trouble|support|help me|assistance)\b', re.IGNORECASE)
+        nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH|troubleshoot|support)\b', re.IGNORECASE)
+        irrelevant = re.compile(r'\b(actor|celebrity|movie|programming|python|code)\b', re.IGNORECASE)
 
         if greetings.search(user_question):
             st.write(bot_template.replace("{{MSG}}", "Hello! How can I assist you today?"), unsafe_allow_html=True)
             return
         elif general_support_queries.search(user_question):
-            st.write(bot_template.replace("{{MSG}}", "I'm here to help! Please describe your issue in more detail."),
-                     unsafe_allow_html=True)
+            st.write(bot_template.replace("{{MSG}}", "I'm here to help! Please describe your issue in more detail."), unsafe_allow_html=True)
             return
         elif irrelevant.search(user_question):
-            st.write(bot_template.replace("{{MSG}}", "Sorry, I can only answer questions related to Nayatel services and telecommunications. Please make sure your question is related to those topics."),
-                     unsafe_allow_html=True)
+            st.write(bot_template.replace("{{MSG}}", "Sorry, I can only answer questions related to Nayatel services and telecommunications. Please make sure your question is related to those topics."), unsafe_allow_html=True)
+            return
+        elif not nayatel_related.search(user_question):
+            st.write(bot_template.replace("{{MSG}}", "I'm here to answer questions related to Nayatel services and telecommunications. Please ask a relevant question."), unsafe_allow_html=True)
             return
 
         # Display user message
@@ -116,8 +109,7 @@ def handle_userinput(user_question):
         relevant_answer_found = False
         for i, message in enumerate(st.session_state.chat_history):
             if i % 2 != 0:
-                answer = message.content.split("Helpful Answer: ")[
-                    -1] if "Helpful Answer: " in message.content else message.content
+                answer = message.content.split("Helpful Answer: ")[-1] if "Helpful Answer: " in message.content else message.content
                 if len(answer.split()) > 5:  # Ensure answer is meaningful
                     st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
                     relevant_answer_found = True
@@ -132,7 +124,6 @@ def handle_userinput(user_question):
             st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
     else:
         st.error("Conversation chain is not initialized. Please process the documents first.")
-
 
 # Function to display FAQs and handle their selection
 def display_faqs():
@@ -151,7 +142,6 @@ def display_faqs():
     for faq in faqs:
         if st.sidebar.button(faq):
             st.session_state.user_question = faq
-
 
 def main():
     st.write(css, unsafe_allow_html=True)
@@ -172,7 +162,6 @@ def main():
         if not user_question:
             user_question = st.session_state.get("user_question")
         handle_userinput(user_question)
-
 
 if __name__ == '__main__':
     main()
