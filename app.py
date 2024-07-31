@@ -91,11 +91,11 @@ def handle_userinput(user_question):
                              huggingfacehub_api_token=huggingface_api_token)
 
         if greetings.search(user_question):
-            llm_response = llm({'question': user_question})
+            llm_response = llm({'prompt': {'question': user_question}})
             st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
             return
         elif general_support_queries.search(user_question):
-            llm_response = llm({'question': user_question})
+            llm_response = llm({'prompt': {'question': user_question}})
             st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
             return
         elif irrelevant.search(user_question):
@@ -123,7 +123,7 @@ def handle_userinput(user_question):
 
         if not relevant_answer_found:
             # Use LLM for a comprehensive answer if the PDF content is insufficient
-            llm_response = llm({'question': user_question})
+            llm_response = llm({'prompt': {'question': user_question}})
             st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
     else:
         st.error("Conversation chain is not initialized. Please process the documents first.")
