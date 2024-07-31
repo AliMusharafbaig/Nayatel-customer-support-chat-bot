@@ -7,3 +7,4 @@ transformers
 faiss-cpu
 concurrent-log-handler
 requests
+langchain-community
