@@ -91,7 +91,8 @@ def handle_userinput(user_question):
         greetings = re.compile(r'\b(hi|hello|hey|good morning|good evening|good afternoon)\b', re.IGNORECASE)
         general_support_queries = re.compile(r'\b(i need help|i\'m in trouble|support|help me|assistance)\b',
                                              re.IGNORECASE)
-        nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH)\b', re.IGNORECASE)
+        nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH|troubleshoot)\b', re.IGNORECASE)
+        irrelevant = re.compile(r'\b(actor|celebrity|movie|programming|python)\b', re.IGNORECASE)
 
         if greetings.search(user_question):
             st.write(bot_template.replace("{{MSG}}", "Hello! How can I assist you today?"), unsafe_allow_html=True)
@@ -100,8 +101,8 @@ def handle_userinput(user_question):
             st.write(bot_template.replace("{{MSG}}", "I'm here to help! Please describe your issue in more detail."),
                      unsafe_allow_html=True)
             return
-        elif not nayatel_related.search(user_question):
-            st.write(bot_template.replace("{{MSG}}", "Sorry, I can only answer questions related to Nayatel services and technology. Please make sure your question is related to those topics."),
+        elif irrelevant.search(user_question):
+            st.write(bot_template.replace("{{MSG}}", "Sorry, I can only answer questions related to Nayatel services and telecommunications. Please make sure your question is related to those topics."),
                      unsafe_allow_html=True)
             return
 
@@ -123,9 +124,12 @@ def handle_userinput(user_question):
                     break
 
         if not relevant_answer_found:
-            st.write(bot_template.replace("{{MSG}}",
-                                          "Sorry, I couldn't find a relevant answer to your question. Please make sure your question is related to Nayatel services."),
-                     unsafe_allow_html=True)
+            # Use LLM for a comprehensive answer if the PDF content is insufficient
+            llm = HuggingFaceHub(repo_id="mistralai/Mistral-Nemo-Instruct-2407",
+                                 model_kwargs={"temperature": 0.5, "max_length": 512},
+                                 huggingfacehub_api_token=huggingface_api_token)
+            llm_response = llm({'question': user_question})
+            st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
     else:
         st.error("Conversation chain is not initialized. Please process the documents first.")
 
