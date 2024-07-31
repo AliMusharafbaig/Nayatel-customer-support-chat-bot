@@ -1,0 +1,9 @@
+streamlit
+python-dotenv
+PyPDF2
+langchain
+huggingface_hub
+transformers
+faiss-cpu
+concurrent-log-handler
+requests
