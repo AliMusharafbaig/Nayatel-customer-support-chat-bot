@@ -8,3 +8,5 @@ faiss-cpu
 concurrent-log-handler
 requests
 torch
+torchvision
+torchaudio
