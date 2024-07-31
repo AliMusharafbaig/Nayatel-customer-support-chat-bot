@@ -81,13 +81,13 @@ with st.spinner("Setting up the bot..."):
 def handle_userinput(user_question):
     if st.session_state.conversation:
         # Determine if the question is a greeting or general support query
-        greetings = re.compile(r'\b(hi|hello|hey|good morning|good evening|good afternoon)\b', re.IGNORECASE)
+        greetings = re.compile(r'\b(hi|hello|hey|good morning|good evening|good afternoon|thank you|thanks)\b', re.IGNORECASE)
         general_support_queries = re.compile(r'\b(i need help|i\'m in trouble|support|help me|assistance)\b', re.IGNORECASE)
         nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH|troubleshoot|support)\b', re.IGNORECASE)
         irrelevant = re.compile(r'\b(actor|celebrity|movie|programming|python|code)\b', re.IGNORECASE)
 
         if greetings.search(user_question):
-            st.write(bot_template.replace("{{MSG}}", "Hello! How can I assist you today?"), unsafe_allow_html=True)
+            st.write(bot_template.replace("{{MSG}}", "You're welcome! How can I assist you further?"), unsafe_allow_html=True)
             return
         elif general_support_queries.search(user_question):
             st.write(bot_template.replace("{{MSG}}", "I'm here to help! Please describe your issue in more detail."), unsafe_allow_html=True)
