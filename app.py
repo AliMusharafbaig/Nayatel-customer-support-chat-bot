@@ -28,7 +28,7 @@ if not huggingface_api_token:
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = huggingface_api_token
 
 # Predefined PDF path
-PDF_PATH = "data/nayatelinformation.pdf"
+PDF_PATH = "nayatelinformation.pdf"
 
 # Function to extract text from a single page
 def extract_text_from_page(page_info):
