@@ -86,11 +86,17 @@ def handle_userinput(user_question):
         nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH|troubleshoot|support)\b', re.IGNORECASE)
         irrelevant = re.compile(r'\b(actor|celebrity|movie|programming|python|code)\b', re.IGNORECASE)
 
+        llm = HuggingFaceHub(repo_id="mistralai/Mistral-Nemo-Instruct-2407",
+                             model_kwargs={"temperature": 0.5, "max_length": 512},
+                             huggingfacehub_api_token=huggingface_api_token)
+
         if greetings.search(user_question):
-            st.write(bot_template.replace("{{MSG}}", "You're welcome! How can I assist you further?"), unsafe_allow_html=True)
+            llm_response = llm({'question': user_question})
+            st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
             return
         elif general_support_queries.search(user_question):
-            st.write(bot_template.replace("{{MSG}}", "I'm here to help! Please describe your issue in more detail."), unsafe_allow_html=True)
+            llm_response = llm({'question': user_question})
+            st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
             return
         elif irrelevant.search(user_question):
             st.write(bot_template.replace("{{MSG}}", "Sorry, I can only answer questions related to Nayatel services and telecommunications. Please make sure your question is related to those topics."), unsafe_allow_html=True)
@@ -117,9 +123,6 @@ def handle_userinput(user_question):
 
         if not relevant_answer_found:
             # Use LLM for a comprehensive answer if the PDF content is insufficient
-            llm = HuggingFaceHub(repo_id="mistralai/Mistral-Nemo-Instruct-2407",
-                                 model_kwargs={"temperature": 0.5, "max_length": 512},
-                                 huggingfacehub_api_token=huggingface_api_token)
             llm_response = llm({'question': user_question})
             st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
     else:
