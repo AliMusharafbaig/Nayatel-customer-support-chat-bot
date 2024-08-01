@@ -163,5 +163,6 @@ def main():
             user_question = st.session_state.get("user_question")
         handle_userinput(user_question)
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
+
