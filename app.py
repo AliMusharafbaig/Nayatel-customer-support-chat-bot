@@ -20,12 +20,12 @@ st.set_page_config(page_title="Nayatel AI Bot", page_icon=":books:", layout="wid
 load_dotenv()
 
 # Ensure the Hugging Face Hub token is set
-huggingface_api_token = os.getenv('HUGGINGFACEHUB_API_TOKEN')
+huggingfacehub_api_token = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 if not huggingfacehub_api_token:
     st.error("HUGGINGFACEHUB_API_TOKEN environment variable is missing.")
     st.stop()
 
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = huggingface_api_token
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = huggingfacehub_api_token
 
 # Predefined PDF path
 PDF_PATH = "nayatelinformation.pdf"
@@ -65,7 +65,7 @@ def get_vectorstore(text_chunks):
 def get_conversation_chain(vectorstore):
     llm = HuggingFaceHub(repo_id="mistralai/Mistral-Nemo-Instruct-2407",
                          model_kwargs={"temperature": 0.5, "max_length": 512},
-                         huggingfacehub_api_token=huggingface_api_token)
+                         huggingfacehub_api_token=huggingfacehub_api_token)
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
     return ConversationalRetrievalChain.from_llm(llm=llm, retriever=vectorstore.as_retriever(), memory=memory)
 
@@ -123,7 +123,7 @@ def handle_userinput(user_question):
             # Use LLM for a comprehensive answer if the PDF content is insufficient
             llm = HuggingFaceHub(repo_id="mistralai/Mistral-Nemo-Instruct-2407",
                                  model_kwargs={"temperature": 0.5, "max_length": 512},
-                                 huggingfacehub_api_token=huggingface_api_token)
+                                 huggingfacehub_api_token=huggingfacehub_api_token)
             llm_response = llm({'question': user_question})
             st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
     else:
