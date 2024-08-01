@@ -115,7 +115,8 @@ def handle_userinput(user_question):
             if i % 2 != 0:
                 answer = message.content.split("Helpful Answer: ")[-1] if "Helpful Answer: " in message.content else message.content
                 if len(answer.split()) > 5:  # Ensure answer is meaningful
-                    st.write(bot_template.replace("{{MSG}}", answer), unsafe_allow_html=True)
+                    refined_answer = refine_answer(answer, user_question)
+                    st.write(bot_template.replace("{{MSG}}", refined_answer), unsafe_allow_html=True)
                     relevant_answer_found = True
                     break
 
@@ -125,9 +126,19 @@ def handle_userinput(user_question):
                                  model_kwargs={"temperature": 0.5, "max_length": 512},
                                  huggingfacehub_api_token=huggingfacehub_api_token)
             llm_response = llm({'question': user_question})
-            st.write(bot_template.replace("{{MSG}}", llm_response['content']), unsafe_allow_html=True)
+            refined_llm_answer = refine_answer(llm_response['content'], user_question)
+            st.write(bot_template.replace("{{MSG}}", refined_llm_answer), unsafe_allow_html=True)
     else:
         st.error("Conversation chain is not initialized. Please process the documents first.")
+
+# Function to refine the answer
+def refine_answer(answer, user_question):
+    # Here we can implement logic to filter and refine the answer to be more concise and relevant
+    # For example, removing irrelevant information and focusing on key points
+    # This is a placeholder implementation, and more sophisticated NLP techniques can be applied
+    sentences = answer.split('. ')
+    relevant_sentences = [sentence for sentence in sentences if any(keyword in sentence.lower() for keyword in user_question.lower().split())]
+    return '. '.join(relevant_sentences) + '.'
 
 # Function to display FAQs and handle their selection
 def display_faqs():
