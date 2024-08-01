@@ -21,7 +21,7 @@ load_dotenv()
 
 # Ensure the Hugging Face Hub token is set
 huggingface_api_token = os.getenv('HUGGINGFACEHUB_API_TOKEN')
-if not huggingface_api_token:
+if not huggingfacehub_api_token:
     st.error("HUGGINGFACEHUB_API_TOKEN environment variable is missing.")
     st.stop()
 
@@ -80,11 +80,23 @@ with st.spinner("Setting up the bot..."):
 # Function to handle user input
 def handle_userinput(user_question):
     if st.session_state.conversation:
-        # Determine if the question is relevant
+        # Determine if the question is a greeting or general support query
+        greetings = re.compile(r'\b(hi|hello|hey|good morning|good evening|good afternoon)\b', re.IGNORECASE)
+        thank_you = re.compile(r'\b(thank you|thanks)\b', re.IGNORECASE)
+        general_support_queries = re.compile(r'\b(i need help|i\'m in trouble|support|help me|assistance)\b', re.IGNORECASE)
         nayatel_related = re.compile(r'\b(nayatel|internet|fiber|broadband|connectivity|modem|router|PPPoE|Ethernet|FTTH|troubleshoot|support|network)\b', re.IGNORECASE)
         irrelevant = re.compile(r'\b(actor|celebrity|movie|programming|python|code)\b', re.IGNORECASE)
 
-        if irrelevant.search(user_question):
+        if greetings.search(user_question):
+            st.write(bot_template.replace("{{MSG}}", "Hello! How can I assist you today?"), unsafe_allow_html=True)
+            return
+        elif thank_you.search(user_question):
+            st.write(bot_template.replace("{{MSG}}", "You're welcome! If you have any more questions, feel free to ask."), unsafe_allow_html=True)
+            return
+        elif general_support_queries.search(user_question):
+            st.write(bot_template.replace("{{MSG}}", "I'm here to help! Please describe your issue in more detail."), unsafe_allow_html=True)
+            return
+        elif irrelevant.search(user_question):
             st.write(bot_template.replace("{{MSG}}", "Sorry, I can only answer questions related to Nayatel services and telecommunications. Please make sure your question is related to those topics."), unsafe_allow_html=True)
             return
         elif not nayatel_related.search(user_question):
